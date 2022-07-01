@@ -2,7 +2,7 @@ import operator
 import numpy as np
 import networkx as nx
 
-from pcgvs.pcg.graph import PCG
+from pcgvs.aggregation.graph import PCG
 
 
 class SaturationCache:
@@ -14,6 +14,7 @@ class SaturationCache:
         self.Spc  = {}
         self._init_params()
     
+
     def _init_params(self):
         """ Precalculate some parameters used in the metrics. 
         """
@@ -28,7 +29,7 @@ class SaturationCache:
             mesure is normalized using the tube with maximum length. 
         """
         if nodekey in self.Sl: return self.Sl[nodekey]
-        tube  = self.pcg.nodes[nodekey].tube
+        tube  = self.pcg.node(nodekey).tube
         self.Sl[nodekey] = tube.frame_length() / self.max_length_tube
         return self.Sl[nodekey]
     
@@ -38,7 +39,7 @@ class SaturationCache:
             corresponding to the node referenced by nodekey.
         """
         if nodekey in self.Sapp: return self.Sapp[nodekey]
-        tube  = self.pcg.nodes[nodekey].tube
+        tube  = self.pcg.node(nodekey).tube
         self.Sapp[nodekey] = (self.video_frames - tube.sframe) / self.video_frames
         return self.Sapp[nodekey]
     
@@ -47,7 +48,7 @@ class SaturationCache:
         """ <Not sure this is correct, check out the paper>
         """
         if nodekey in self.Spc: return self.Spc[nodekey]
-        tube  = self.pcg.nodes[nodekey].tube
+        tube  = self.pcg.node(nodekey).tube
         same_mnode = len([ node for node in self.pcg.nodes.values() if node.tube.tag == tube.tag ])
         self.Spc[nodekey] =  same_mnode / len(self.pcg.nodes)
         return self.Spc[nodekey]
@@ -58,13 +59,12 @@ class SaturationCache:
             of different colors in the adjacents nodes of the node
             referenced by nodekey. This one cannot be cached. 
         """
-        #---------------------------------------#
-        # Fix this metric! That's not the metric read in the paper. 
-        #---------------------------------------#        
-        nodes_weight_map = self.pcg.A[nodekey]
-        adjacent_nodes = [ v for v, w in nodes_weight_map.items() if w != 0 ]
-        sat = len([ k for k in adjacent_nodes if self.pcg.nodes[k].color is not None ])
-        return sat / len(self.pcg.nodes)
+        different_colors = set()
+        adjacents = self.pcg.adjacents(nodekey)
+        for k, v in adjacents:
+            if v.color is not None:
+                different_colors.add(v.color)
+        return len(different_colors) / len(self.pcg.nodes)
     
     
     def saturation(self, nodekey):
@@ -75,6 +75,7 @@ class SaturationCache:
              + self._Sapp(nodekey) \
              + self._Spc(nodekey)
     
+
     def saturations(self, nodekeys):
         """ Calculate the saturation of all the nodes. 
         """
@@ -116,26 +117,21 @@ def does_not_overlap(pcg: PCG, proposed_color, nodekey):
 #---------------------------------------#
 
 def ssort(saturations, pcg):
+    """ This function sorts the nodes in decreasing order 
+        by their saturations. The appearance time is used to break ties. 
     """
-    """
-    olist = []
-    nnodes = len(saturations)
-    while len(olist) < nnodes:
-        max_sat = max(saturations.values())
-        ties = [ nk for nk in saturations.keys() if saturations[nk] == max_sat ]
-        appearings = { nk:pcg.nodes[nk].tube.sframe for nk in ties }
-        winner_key = min( appearings.items(), key=operator.itemgetter(1) )[0]
-        olist.append(winner_key)
-        del saturations[winner_key]
-    return olist
+    app = lambda key: pcg.node(key).tube.sframe
+    olist = [ ( k, sat, app(k) ) for k, sat in saturations.items() ]
+    olist.sort(key=lambda x: (x[1], x[2]), reverse=True)
+    return [ k for k, sat, app in olist ]
+
 
 #---------------------------------------#
 #---------------------------------------#
 #---------------------------------------#
 
 def color_graph(pcg: PCG, q=5):
-    """
-    """
+    """ Implements the He Et al. graph coloring algorithm """
     color = 1
     pcg.clean_colors()
     sc = SaturationCache(pcg)    
@@ -150,7 +146,7 @@ def color_graph(pcg: PCG, q=5):
             if pcg.node(nodekey).color is not None: continue
             if q_far_apart(pcg, color, nodekey, q) and does_not_overlap(pcg, color, nodekey):
                 
-                pcg.nodes[nodekey].color = color
+                pcg.node(nodekey).color = color
                 if pcg.generated_by_overlapping(nodekey):
                     oppnode = pcg.node(pcg.identify_opposite(nodekey))
                     if oppnode.color is not None: continue
@@ -158,7 +154,6 @@ def color_graph(pcg: PCG, q=5):
                     vs, ve, _, _ = pcg.identify_quatern(nodekey)
                     delta = pcg.node(ve).frame - pcg.node(vs).frame
                     oppnode.color = color + m * delta  
-
         color += 1
         
 #---------------------------------------#
@@ -167,6 +162,9 @@ def color_graph(pcg: PCG, q=5):
 
 
 def starting_nodes_or_intersections(pcg, tube):
+    """ Utility function to retrieve only the starting nodes 
+        of an overlapping relation and the intersection nodes. 
+    """
     selected_nodes = []
     for key, node in pcg.nodes.items():
         if node.tube.tag != tube.tag or key[-1] == 'e': continue
@@ -178,12 +176,11 @@ def starting_nodes_or_intersections(pcg, tube):
 #---------------------------------------#
 
 
-
 def tubes_starting_time(pcg: PCG, q=3):
-
-    def get_ordered_dict(_dict, keys_vocab):
-        return { k: v for k, v in sorted(_dict.items(), key=lambda item: item[1]) if k in keys_vocab}
-
+    """ Partially use Allegra Et al. optimization of the 
+        algorithm to calculate the starting time for the tubes, 
+        once the graph is colored. 
+    """
     li = {}
     for tube in pcg.tubes:
         nodes = starting_nodes_or_intersections(pcg, tube)
@@ -204,9 +201,11 @@ def tubes_starting_time(pcg: PCG, q=3):
     starting_time = {}
 
     for Ck in nx.connected_components(G):
-        Ck_ordered = get_ordered_dict(li, Ck).keys()    
+        tmp = sorted(li.items(), key=lambda item: item[1])
+        Ck_ordered = { k: v for k, v in tmp if k in Ck}
         l1 = min([ l for tag, l in li.items() if tag in Ck ])
         for i, tag in enumerate(Ck_ordered):
             starting_time[tag] = l1 + (q * i)
             
     return starting_time
+

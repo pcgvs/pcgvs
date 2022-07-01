@@ -34,6 +34,7 @@ class RelationsMap:
         self.tubes = tubes
         self.relations = {}
         self._fill_with_irrilevant_relations()
+        self._compute()
 
 
     def _fill_with_irrilevant_relations(self):
@@ -43,7 +44,7 @@ class RelationsMap:
                 self.relations[Ta.tag][Tb.tag] = None
 
 
-    def compute(self):        
+    def _compute(self):        
         for Ta, Tb in permutations(self.tubes, 2):
             if Ta == Tb: continue
             # we focus on tube A and check the intersections with Tube B. 
