@@ -2,3 +2,4 @@ numpy
 networkx
 opencv-python
 pandas
+click
