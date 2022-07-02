@@ -1,13 +1,13 @@
-import cv2
-import numpy as np
 import os
 import sys
+import shutil
+import numpy as np
+import pandas as pd
+import cv2
 
+from os import path 
 from pathlib import Path
 from pcgvs.extraction.track import run
-
-FILE = Path(__file__).resolve()
-ROOT = FILE.parents[0]  # yolov5 strongsort root directory
 
 class Tube: 
     
@@ -20,7 +20,6 @@ class Tube:
         self.bbY = [] # bounding box y-axis
         self.bbH = [] # bounding box height
         self.bbW = [] # bounding box width
-
 
     def __len__(self):
         return len(self.bbX)
@@ -60,16 +59,46 @@ class Tube:
     def __str__(self):
         return self.tag
 
-    
-def extract_tubes(source, yolo_weights, strong_sort_weights):
+
+def extract_tubes(source, outputdir, yolo_weights='yolov5m6.pt', strong_sort_weights='osnet_x1_0_market1501.pt'):
+    weights_folder = path.join(outputdir, 'weights')
+    yolo_weights_path = path.join(weights_folder, yolo_weights)
+    strong_sort_weights_path = path.join(weights_folder, strong_sort_weights) 
     if source == '' or source == '0':
         print("ERROR: you have to specify a correct video path")
         sys.exit(-1)
     run(
         source=source, 
-        yolo_weights=yolo_weights, 
-        strong_sort_weights=strong_sort_weights
+        yolo_weights=yolo_weights_path, 
+        strong_sort_weights=strong_sort_weights_path, 
+        project=path.join(outputdir, 'tubes')
     )
+    tubes_filename = path.basename(source).split('.')[0] + '.txt'
+    return path.join(outputdir, f'tubes/exp/tracks/{tubes_filename}')
+
+
+def load_tubes_with_pandas(path):
+    columns = ['frame', 'tag', 'x', 'y', 'w','h']
+    with open(path) as output:
+        rawdata = [ line.strip().split(' ')[:6] for line in output.readlines() ]
+        df = pd.DataFrame(rawdata, columns=columns)
+        df = df.astype('int')
+    return df
+
+
+def load_tubes_from_pandas_dataframe(df):
+    tubes = []
+    for tag in df.tag.unique():
+        ob_df = df[df['tag'] == tag]
+        if (len(ob_df) < 10): continue # remove shadows
+        ob_df = ob_df.sort_values(by='frame')
+        sframe = ob_df.frame.min()
+        eframe = ob_df.frame.max()
+        tube = Tube(tag, sframe, eframe)
+        tubes.append(tube)
+        for _, r in ob_df.iterrows():
+            tube.next_bounding_box(r['x'], r['y'], r['w'], r['h'])
+    return tubes 
 
 
 def _create_frames_dictionary(source_tubes):
@@ -83,48 +112,44 @@ def _create_frames_dictionary(source_tubes):
     return frames
 
 
-def extract_sub_images(path_tubes, media_path):
+def extract_patches(source, outputdir, path_tubes):
     frames = _create_frames_dictionary(path_tubes)
-    cap = cv2.VideoCapture(media_path)
-    folder_name = str(ROOT / (media_path.split("/")[-1])[:-4])
-    
-    try:
-        os.mkdir(folder_name)
-    except:
-        print(f"ERROR: {folder_name} already exist")
-        sys.exit(-1)
-    
+    cap = cv2.VideoCapture(source)
+    patchespath = path.join(outputdir, 'patches')    
+
+    if path.exists(patchespath):
+        shutil.rmtree(patchespath)
+    os.mkdir(patchespath)    
+
     ret = True
     num_frame = 1
     while ret:
         ret, frame = cap.read()
-
         if num_frame in frames.keys():
             for id, x, y, w, h in frames[num_frame]:
                 ROI = frame[y:y+h, x:x+w].copy()
-                cv2.imwrite(folder_name + "/" + str(id) + "_" + str(num_frame) + '.jpg', ROI)
-        
+                filename = str(id) + "_" + str(num_frame) + '.jpg'
+                cv2.imwrite(path.join(patchespath, filename), ROI)
         num_frame += 1
+    return patchespath
 
 
-def extract_background(path_tubes, media_path):
+def extract_background(source, outputdir, path_tubes):
     frames = _create_frames_dictionary(path_tubes)
-    cap = cv2.VideoCapture(media_path)
-    
+    cap = cv2.VideoCapture(source)
     ret = True
-    background = True
     count_bg = 0
     num_frame = 1
+    bgpath = path.join(outputdir, 'background.jpg')
     while ret:
         ret, frame = cap.read()
-
         if num_frame in frames.keys():
             count_bg = 0
-        elif background and count_bg > 8:
-            background = False
-            cv2.imwrite(str(ROOT / ((media_path.split("/")[-1])[:-4] + "_background.jpg")), frame)
+        elif count_bg > 10:
+            cv2.imwrite(bgpath, frame)
             ret = False
         else:
             count_bg += 1
-        
         num_frame += 1
+    return bgpath
+    

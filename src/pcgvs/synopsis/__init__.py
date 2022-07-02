@@ -1,16 +1,38 @@
 import cv2
 import datetime
 
+from os import path
 from pcgvs.synopsis.interpolation import complete_frames
 
-def generate_synopsis(frames, output, fps, bgpath, interp=False):
+
+def generate_frames(dataframe, patches_path):
+    frames = {}
+    for idx, row in dataframe.iterrows():
+        nf = int(row['newframe'])
+        if nf not in frames: frames[nf] = []
+        patchpath = path.join(patches_path, f'{row["tag"]}_{row["frame"]}.jpg')
+        frames[nf].append({
+            'tag': int(row['tag']), 
+            'file': patchpath, 
+            'x': int(row['x']), 
+            'y': int(row['y']), 
+            'w': int(row['w']), 
+            'h': int(row['h']), 
+            'frame': int(row['frame'])
+        })     
+    return frames
+
+
+def generate_synopsis(frames, output_dir, fps, bgpath, interp=False):
     """
     """
+    output = path.join(output_dir, 'synopsis.avi')
     _frames = frames.copy()
     max_frame = max(list(_frames.keys()))
+
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     out = cv2.VideoWriter(output, fourcc, fps, (1280,1080))
-    
+
     if interp: _frames = complete_frames(_frames)    
     
     for num_frame in range(1, max_frame + 1):

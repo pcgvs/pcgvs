@@ -3,15 +3,17 @@ import numpy as np
 import warnings
 from collections import defaultdict
 
-try:
-    from pcgvs.extraction.strong_sort.deep.reid.torchreid.metrics.rank_cylib.rank_cy import evaluate_cy
-    IS_CYTHON_AVAI = True
-except ImportError:
-    IS_CYTHON_AVAI = False
-    warnings.warn(
-        'Cython evaluation (very fast so highly recommended) is '
-        'unavailable, now use python evaluation.'
-    )
+IS_CYTHON_AVAI = False
+
+# try:
+#     from pcgvs.extraction.strong_sort.deep.reid.torchreid.metrics.rank_cylib.rank_cy import evaluate_cy
+#     IS_CYTHON_AVAI = True
+# except ImportError:
+#     IS_CYTHON_AVAI = False
+#     warnings.warn(
+#         'Cython evaluation (very fast so highly recommended) is '
+#         'unavailable, now use python evaluation.'
+#     )
 
 
 def eval_cuhk03(distmat, q_pids, g_pids, q_camids, g_camids, max_rank):
