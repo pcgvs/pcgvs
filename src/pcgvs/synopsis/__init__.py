@@ -1,0 +1,44 @@
+import cv2
+import datetime
+
+from pcgvs.synopsis.interpolation import complete_frames
+
+def generate_synopsis(frames, output, fps, bgpath, interp=False):
+    """
+    """
+    _frames = frames.copy()
+    max_frame = max(list(_frames.keys()))
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out = cv2.VideoWriter(output, fourcc, fps, (1280,1080))
+    
+    if interp: _frames = complete_frames(_frames)    
+    
+    for num_frame in range(1, max_frame + 1):
+        frame = cv2.imread(bgpath)
+        if num_frame in _frames.keys():           
+            objects = sorted(_frames[num_frame], key=lambda d: d['tag'], reverse=True) 
+            for obj in objects:
+                fr = obj.get('frame')
+                s_img = cv2.imread(obj.get('file'))
+                x = int(obj.get('x'))
+                y = int(obj.get('y'))
+                w = int(obj.get('w'))
+                h = int(obj.get('h'))                
+                time = str(datetime.timedelta(seconds=int(fr/30)))
+                
+                # TODO: When interpolation is activated, some bounding boxes
+                # are positioned in ambiguous places and the following assignment 
+                # fails. In order to succeed, we need to cut the bounding box according
+                # to "frame" dimensions. 
+
+                try:
+                    frame[y:y+s_img.shape[0], x:x+s_img.shape[1]] = s_img
+                    cv2.rectangle(frame,(x,y),(x+w,y+h),thickness=2,color=(255,0,0))
+                    cv2.putText(frame, time,(x,y-20),cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,255,0), 2)
+                except:
+                    continue
+        try:
+            out.write(frame[:-200])
+        except:
+            continue
+    out.release()
