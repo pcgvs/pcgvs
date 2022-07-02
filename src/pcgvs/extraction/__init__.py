@@ -60,7 +60,7 @@ class Tube:
         return self.tag
 
 
-def extract_tubes(source, outputdir, yolo_weights='yolov5m6.pt', strong_sort_weights='osnet_x1_0_market1501.pt'):
+def extract_tubes(source, outputdir, conf_thres=0.15, yolo_weights='yolov5m6.pt', strong_sort_weights='osnet_x1_0_market1501.pt', threads=1):
     weights_folder = path.join(outputdir, 'weights')
     yolo_weights_path = path.join(weights_folder, yolo_weights)
     strong_sort_weights_path = path.join(weights_folder, strong_sort_weights) 
@@ -71,7 +71,9 @@ def extract_tubes(source, outputdir, yolo_weights='yolov5m6.pt', strong_sort_wei
         source=source, 
         yolo_weights=yolo_weights_path, 
         strong_sort_weights=strong_sort_weights_path, 
-        project=path.join(outputdir, 'tubes')
+        project=path.join(outputdir, 'tubes'),
+        threads=threads, 
+        conf_thres=conf_thres
     )
     tubes_filename = path.basename(source).split('.')[0] + '.txt'
     return path.join(outputdir, f'tubes/exp/tracks/{tubes_filename}')

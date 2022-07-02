@@ -3,12 +3,6 @@ from functools import total_ordering
 
 import os
 
-# limit the number of cpus used by high performance libraries
-os.environ["OMP_NUM_THREADS"]           = "1"
-os.environ["OPENBLAS_NUM_THREADS"]      = "1"
-os.environ["MKL_NUM_THREADS"]           = "1"
-os.environ["VECLIB_MAXIMUM_THREADS"]    = "1"
-os.environ["NUMEXPR_NUM_THREADS"]       = "1"
 
 import sys
 import numpy as np
@@ -69,7 +63,14 @@ def run(
         hide_class=False,           # hide IDs
         half=False,                 # use FP16 half-precision inference
         dnn=False,                  # use OpenCV DNN for ONNX inference
+        threads=1                   # threads to use
 ):
+
+    os.environ["OMP_NUM_THREADS"]           = str(threads)
+    os.environ["OPENBLAS_NUM_THREADS"]      = str(threads)
+    os.environ["MKL_NUM_THREADS"]           = str(threads)
+    os.environ["VECLIB_MAXIMUM_THREADS"]    = str(threads)
+    os.environ["NUMEXPR_NUM_THREADS"]       = str(threads)
 
     source = str(source)
     save_img = not nosave and not source.endswith('.txt')  # save inference images
