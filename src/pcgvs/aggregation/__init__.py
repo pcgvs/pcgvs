@@ -7,8 +7,11 @@ from pcgvs.aggregation.relations import RelationsMap
 from pcgvs.extraction import Tube
 
 def solve(tubes: List[Tube], q=3):
+    print('computing the relations')
     relations = RelationsMap(tubes)
+    print('Generating the potential collision graph')
     pcg = PCG(tubes, relations)
+    print('Applying graph coloring algorithm')
     color_graph(pcg)
     return tubes_starting_time(pcg, q)
 

@@ -133,6 +133,8 @@ def extract_patches(source, outputdir, path_tubes):
                 filename = str(id) + "_" + str(num_frame) + '.jpg'
                 cv2.imwrite(path.join(patchespath, filename), ROI)
         num_frame += 1
+        print(f'extracting patches on frame {num_frame}')
+
     return patchespath
 
 
@@ -143,8 +145,12 @@ def extract_background(source, outputdir, path_tubes):
     count_bg = 0
     num_frame = 1
     bgpath = path.join(outputdir, 'background.jpg')
+    emergencybg = None
+
     while ret:
         ret, frame = cap.read()
+        if emergencybg is None and frame is not None:
+            emergencybg = frame
         if num_frame in frames.keys():
             count_bg = 0
         elif count_bg > 10:
@@ -153,5 +159,10 @@ def extract_background(source, outputdir, path_tubes):
         else:
             count_bg += 1
         num_frame += 1
+        print(f'extracting background | frame {num_frame}')
+
+    if count_bg <= 10:
+        cv2.imwrite(bgpath, emergencybg)
+
     return bgpath
     

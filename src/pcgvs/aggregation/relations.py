@@ -1,5 +1,6 @@
 import numpy as np
 
+from tqdm import tqdm
 from itertools import permutations
 
 
@@ -44,8 +45,10 @@ class RelationsMap:
                 self.relations[Ta.tag][Tb.tag] = None
 
 
-    def _compute(self):        
-        for Ta, Tb in permutations(self.tubes, 2):
+    def _compute(self):
+        perms = permutations(self.tubes, 2)
+        count = sum(1 for _ in perms)
+        for Ta, Tb in tqdm(perms, total=count):
             if Ta == Tb: continue
             # we focus on tube A and check the intersections with Tube B. 
             ffintersec = None # first frame of intersection.

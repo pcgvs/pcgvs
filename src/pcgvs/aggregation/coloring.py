@@ -146,6 +146,7 @@ def color_graph(pcg: PCG, q=5):
             if pcg.node(nodekey).color is not None: continue
             if q_far_apart(pcg, color, nodekey, q) and does_not_overlap(pcg, color, nodekey):
                 
+                print(f'Coloring node {nodekey} to {color}')
                 pcg.node(nodekey).color = color
                 if pcg.generated_by_overlapping(nodekey):
                     oppnode = pcg.node(pcg.identify_opposite(nodekey))
@@ -154,6 +155,8 @@ def color_graph(pcg: PCG, q=5):
                     vs, ve, _, _ = pcg.identify_quatern(nodekey)
                     delta = pcg.node(ve).frame - pcg.node(vs).frame
                     oppnode.color = color + m * delta  
+                    print(f'Coloring node {oppnode.id} to {oppnode.color}')
+
         color += 1
         
 #---------------------------------------#
