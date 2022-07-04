@@ -32,7 +32,9 @@ def generate_synopsis(frames, output_dir, fps, bgpath, interp=False):
     max_frame = max(list(_frames.keys()))
 
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = cv2.VideoWriter(output, fourcc, fps, (1280, _get_video_height(bgpath)))
+    width, height = _get_video_shape(bgpath)
+
+    out = cv2.VideoWriter(output, fourcc, fps, (width, height))
 
     if interp: _frames = complete_frames(_frames)    
     
@@ -67,6 +69,6 @@ def generate_synopsis(frames, output_dir, fps, bgpath, interp=False):
     out.release()
 
 
-def _get_video_height(bgpath: str):
+def _get_video_shape(bgpath: str):
     img = Image.open(bgpath)
-    return img.height
+    return img.width, img.height
