@@ -1,7 +1,14 @@
 import click
+import cv2
+from matplotlib import patches
+import torch
 
+from os import path
 from pcgvs.extraction import extract_tubes, extract_patches, extract_background, load_tubes_from_pandas_dataframe, load_tubes_with_pandas
 from pcgvs.aggregation import solve, add_ss_to_dataframe
+from pcgvs.aggregation.relations import RelationsMap
+from pcgvs.aggregation.graph import PCG
+from pcgvs.aggregation.coloring import color_graph, tubes_starting_time
 from pcgvs.synopsis import generate_frames, generate_synopsis
 
 @click.command()
@@ -13,6 +20,12 @@ from pcgvs.synopsis import generate_frames, generate_synopsis
 @click.option('--interp/--no-interp',   help="Interpolates the missing bounding boxes", default=True)
 def synopsis(i, o, q, t, c, interp):
 
+    if cv2.cuda.getCudaEnabledDeviceCount() > 0:
+        print('OpenCV is using GPU.')
+
+    if torch.cuda.is_available():
+        print('Torch is using GPU', torch.cuda.current_device())
+
     # Extraction
     tubes_path = extract_tubes(source=i, outputdir=o, conf_thres=c, threads=t)
     patches_path = extract_patches(source=i, outputdir=o, path_tubes=tubes_path)
@@ -21,12 +34,20 @@ def synopsis(i, o, q, t, c, interp):
     # Aggregation
     dataframe = load_tubes_with_pandas(tubes_path)
     tubes = load_tubes_from_pandas_dataframe(dataframe)
-    starting_times = solve(tubes, q)
+    print('computing the relations')
+    relations = RelationsMap(tubes)
+    print('Generating the potential collision graph')
+    pcg = PCG(tubes, relations)
+    print('Applying graph coloring algorithm')
+    color_graph(pcg, q)
+    starting_times = tubes_starting_time(pcg, q)
+
 
     # Synopsis
     df = add_ss_to_dataframe(dataframe, tubes, starting_times)
     frames = generate_frames(df, patches_path)
     generate_synopsis(frames, o, 30, background_path, interp)
+    print('Video synopsis generated')
 
 
 if __name__ == '__main__': synopsis()

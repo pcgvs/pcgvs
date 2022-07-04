@@ -57,7 +57,7 @@ class PCG:
             tube_relations = rmap[tube.tag]
             
             if self._generates_isolated_main_node(tube_relations):
-                self.nodes[tube.tag] = Node(tube.tag, tube)
+                self.nodes[str(tube.tag)] = Node(tube.tag, tube)
                 continue
             
             # If we arrive here, then our tube collide with some other tube,
@@ -121,7 +121,11 @@ class PCG:
 
     def node(self, key) -> Node:
         return self.nodes[key]
+
     
+    def isolated_main_node(self, key: str) -> bool:
+        return len(key.split('-')) == 1
+
 
     def generated_by_intersection(self, key: str) -> bool:
         return len(key.split('-')) == 2
