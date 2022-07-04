@@ -13,7 +13,7 @@
 - **[Quickstart](#-quickstart)**
 - **[Data Flow](#-data-flow)**
 - **[Bibliography](#-bibliography)**
-- **[Authors](#%EF%B8%8F-authors)**
+- **[Authors](#-authors)**
 
 ------
 
@@ -116,7 +116,7 @@ from pcgvs.extraction import TubeExtraction
 
 
 
-## ✍️ Authors 
+## 🖊️ Authors 
 
 * [Luigi Seminara](https://github.com/Gigi-G)
 * [Lemuel Puglisi](https://github.com/LemuelPuglisi) 
