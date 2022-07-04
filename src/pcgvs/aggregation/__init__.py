@@ -1,5 +1,4 @@
 from typing import List
-import pandas as pd
 
 from pcgvs.aggregation.coloring import color_graph, tubes_starting_time
 from pcgvs.aggregation.graph import PCG

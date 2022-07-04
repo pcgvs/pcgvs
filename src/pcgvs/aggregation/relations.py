@@ -1,4 +1,6 @@
+from cmath import e
 import numpy as np
+import json
 
 from tqdm import tqdm
 from itertools import permutations
@@ -36,6 +38,18 @@ class RelationsMap:
         self.relations = {}
         self._fill_with_irrilevant_relations()
         self._compute()
+
+
+    # @staticmethod
+    # def precomputed_from_json(tubes, path):
+    #     try:
+    #         with open(path, 'r') as jsonfile:
+    #             relations = json.load(jsonfile)
+    #             rmap = RelationsMap(tubes)
+    #             rmap.relations = relations
+    #             return rmap
+    #     except:
+    #         raise Exception('File not found.')
 
 
     def _fill_with_irrilevant_relations(self):
@@ -94,7 +108,15 @@ class RelationsMap:
     def as_dict(self):
         return self.relations
     
-    
+
+    # def as_json(self, path):
+    #     with open(path, 'w') as jsonfile:
+    #         dcp = self.as_dict().copy()
+    #         for k in dcp:
+
+    #         json.dump(self.as_dict(), jsonfile)
+
+
     def __str__(self):
         out = ""
         for k1 in self.relations.keys():

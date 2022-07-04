@@ -3,6 +3,7 @@ import numpy as np
 import networkx as nx
 
 from pcgvs.aggregation.graph import PCG
+from pcgvs.extraction import Tube
 
 
 class SaturationCache:
@@ -105,7 +106,8 @@ def q_far_apart(pcg, proposed_color, nodekey, q=5):
 def does_not_overlap(pcg: PCG, proposed_color, nodekey):
     """ See condition 2 in paper He et Al. 
     """
-    if pcg.generated_by_intersection(nodekey): return True
+    if pcg.generated_by_intersection(nodekey) or pcg.isolated_main_node(nodekey): 
+        return True
     vi, vj, vip, vjp = pcg.identify_quatern(nodekey)
     vi, vj, vip, vjp = pcg.node(vi), pcg.node(vj), pcg.node(vip), pcg.node(vjp)
     if vip.color is None or vjp.color is None: return True
@@ -164,13 +166,14 @@ def color_graph(pcg: PCG, q=5):
 #---------------------------------------#
 
 
-def starting_nodes_or_intersections(pcg, tube):
+def starting_nodes_or_intersections(pcg: PCG, tube: Tube):
     """ Utility function to retrieve only the starting nodes 
         of an overlapping relation and the intersection nodes. 
     """
     selected_nodes = []
     for key, node in pcg.nodes.items():
-        if node.tube.tag != tube.tag or key[-1] == 'e': continue
+        if node.tube.tag != tube.tag or key[-1] == 'e' or pcg.isolated_main_node(key): 
+            continue
         selected_nodes.append((key, node))
     return selected_nodes
 
@@ -187,8 +190,13 @@ def tubes_starting_time(pcg: PCG, q=3):
     li = {}
     for tube in pcg.tubes:
         nodes = starting_nodes_or_intersections(pcg, tube)
-        optim = lambda node: node.color - (node.frame - tube.sframe)    
-        li[tube.tag] = max(1, min([ optim(node) for _, node in nodes ]))
+        optim = lambda node: node.color - (node.frame - tube.sframe)
+        if len(nodes) == 0:
+            # tube generates an isolated m-node, we can make it start at
+            # frame 1 because it doesn't intersect with other tubes. 
+            li[tube.tag] = 1
+        else:
+            li[tube.tag] = max(1, min([ optim(node) for _, node in nodes ]))
 
     G = nx.Graph()
     G.add_nodes_from([ tube.tag for tube in pcg.tubes ])

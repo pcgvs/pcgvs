@@ -1,6 +1,7 @@
 import cv2
 import datetime
 
+from PIL import Image
 from os import path
 from pcgvs.synopsis.interpolation import complete_frames
 
@@ -31,8 +32,7 @@ def generate_synopsis(frames, output_dir, fps, bgpath, interp=False):
     max_frame = max(list(_frames.keys()))
 
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    #out = cv2.VideoWriter(output, fourcc, fps, (1280,1080))
-    out = cv2.VideoWriter(output, fourcc, fps, (1280,720))
+    out = cv2.VideoWriter(output, fourcc, fps, (1280, _get_video_height(bgpath)))
 
     if interp: _frames = complete_frames(_frames)    
     
@@ -61,8 +61,12 @@ def generate_synopsis(frames, output_dir, fps, bgpath, interp=False):
                 except:
                     continue
         try:
-            #out.write(frame[:-200])
             out.write(frame)
         except:
             continue
     out.release()
+
+
+def _get_video_height(bgpath: str):
+    img = Image.open(bgpath)
+    return img.height
