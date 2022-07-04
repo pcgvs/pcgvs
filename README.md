@@ -2,7 +2,7 @@
 
 
 
-<img align="center" src="media/marchio.png" style="zoom: 50%;" >
+<center><img align="center" src="media/marchio.png" style="zoom: 50%;" ></center>
 
 
 
@@ -10,10 +10,10 @@
 
 ------
 
-- **[Quickstart](#⚡ Quickstart)**
-- **[Data Flow](#📊 Data Flow)**
-- **[Bibliography](#📚 Bibliography)**
-- **[Authors](#✍️ Authors)**
+- **[Quickstart](#⚡-Quickstart)**
+- **[Data Flow](#📊-Data-Flow)**
+- **[Bibliography](#📚-Bibliography)**
+- **[Authors](#✍️-Authors)**
 
 ------
 
@@ -59,7 +59,7 @@ from pcgvs.extraction import TubeExtraction
 
 ## 📚 Bibliography
 
-```latex
+```
 @software{glenn_jocher_2021_5563715,
   author       = {Glenn Jocher et. al.},
   title        = {{ultralytics/yolov5: v6.0 - YOLOv5n 'Nano' models, 
@@ -74,16 +74,16 @@ from pcgvs.extraction import TubeExtraction
 }
 ```
 
-```latex
+```
 @misc{yolov5-strongsort-osnet-2022,
     title			= {Real-time multi-camera multi-object tracker using YOLOv5 and StrongSORT with OSNet},
     author			= {Mikel Broström},
-    howpublished 	= {\url{https://github.com/mikel-brostrom/Yolov5_StrongSORT_OSNet}},
+    howpublished	= {\url{https://github.com/mikel-brostrom/Yolov5_StrongSORT_OSNet}},
     year			= {2022}
 }
 ```
 
-```latex
+```
 @article{HeGSQH17,  
 		title 		= {Graph coloring based surveillance video synopsis},  
 		author 		= {Yi He and Changxin Gao and Nong Sang and Zhiguo Qu and Jun Han},  
@@ -99,7 +99,7 @@ from pcgvs.extraction import TubeExtraction
 }
 ```
 
-```latex
+```
 @INPROCEEDINGS{8803795,  
 			author		= {Pappalardo, Giovanna and Allegra, Dario and Stanco, Filippo and Battiato, Sebastiano},  
 			booktitle	= {2019 IEEE International Conference on Image Processing (ICIP)},  
