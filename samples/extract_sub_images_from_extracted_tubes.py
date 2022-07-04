@@ -1,3 +1,3 @@
-from pcgvs.extraction import extract_sub_images
+from pcgvs.extraction import extract_patches
 
-extract_sub_images(path_tubes="../notebooks/data/video-1.txt", media_path="../notebooks/videos/video-1-raw.mp4")
+extract_patches(path_tubes="../notebooks/data/video-1.txt", outputdir="./video-1-raw", media_path="../notebooks/videos/video-1-raw.mp4")
