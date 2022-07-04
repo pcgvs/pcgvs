@@ -60,9 +60,8 @@ class RelationsMap:
 
 
     def _compute(self):
-        perms = permutations(self.tubes, 2)
-        count = sum(1 for _ in perms)
-        for Ta, Tb in tqdm(perms, total=count):
+        n = len(self.tubes) 
+        for Ta, Tb in tqdm(permutations(self.tubes, 2), total=n*(n-1)):
             if Ta == Tb: continue
             # we focus on tube A and check the intersections with Tube B. 
             ffintersec = None # first frame of intersection.
@@ -80,9 +79,19 @@ class RelationsMap:
             # Following the paper recommendations, we 
             # set the interaction as overlapping if there 
             # are more than 5 intersecting frames. 
-            self.relations[Ta.tag][Tb.tag] = Intersection(ffintersec) \
-                if lfintersec - ffintersec < 5 \
-                else Overlapping(ffintersec, lfintersec)
+            delta = lfintersec - ffintersec
+
+            if self.relations[Tb.tag][Ta.tag] is not None:
+                # If Tb-Ta relation is computed as INT or OVL, we need to
+                # stick with the previous type of relation. 
+                prel = self.relations[Tb.tag][Ta.tag]
+                self.relations[Ta.tag][Tb.tag] = Intersection(ffintersec) \
+                    if type(prel) == Intersection \
+                    else Overlapping(ffintersec, lfintersec)         
+            else: 
+                self.relations[Ta.tag][Tb.tag] = Intersection(ffintersec) \
+                    if lfintersec - ffintersec < 5 \
+                    else Overlapping(ffintersec, lfintersec)
               
 
     def _frames_intersect(self, adata, bdata):

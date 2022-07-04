@@ -1,9 +1,7 @@
 import click
 import cv2
-from matplotlib import patches
 import torch
 
-from os import path
 from pcgvs.extraction import extract_tubes, extract_patches, extract_background, load_tubes_from_pandas_dataframe, load_tubes_with_pandas
 from pcgvs.aggregation import solve, add_ss_to_dataframe
 from pcgvs.aggregation.relations import RelationsMap
@@ -36,6 +34,7 @@ def synopsis(i, o, q, t, c, interp):
     tubes = load_tubes_from_pandas_dataframe(dataframe)
     print('computing the relations')
     relations = RelationsMap(tubes)
+    print(relations)
     print('Generating the potential collision graph')
     pcg = PCG(tubes, relations)
     print('Applying graph coloring algorithm')
