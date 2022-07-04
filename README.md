@@ -2,7 +2,7 @@
 
 
 
-<center><img align="center" src="media/marchio.png" style="zoom: 50%;" ></center>
+<p align="center"><img align="center" src="media/marchio.png" style="zoom: 50%;" ></p>
 
 
 
@@ -10,10 +10,10 @@
 
 ------
 
-- **[Quickstart](#⚡-Quickstart)**
-- **[Data Flow](#📊-Data-Flow)**
-- **[Bibliography](#📚-Bibliography)**
-- **[Authors](#✍️-Authors)**
+- **[Quickstart](#-quickstart)**
+- **[Data Flow](#-data-flow)**
+- **[Bibliography](#-bibliography)**
+- **[Authors](#%EF%B8%8F-authors)**
 
 ------
 
