@@ -78,7 +78,7 @@ from pcgvs.extraction import TubeExtraction
 @misc{yolov5-strongsort-osnet-2022,
   title			= {Real-time multi-camera multi-object tracker using YOLOv5 and StrongSORT with OSNet},
   author		= {Mikel Broström},
-  howpublished  = {\url{https://github.com/mikel-brostrom/Yolov5_StrongSORT_OSNet}},
+  howpublished  	= {\url{https://github.com/mikel-brostrom/Yolov5_StrongSORT_OSNet}},
   year			= {2022}
 }
 ```
@@ -90,7 +90,7 @@ from pcgvs.extraction import TubeExtraction
   year 		= {2017},  
   doi 		= {10.1016/j.neucom.2016.11.011},  
   url 		= {http://dx.doi.org/10.1016/j.neucom.2016.11.011},  
-  researchr = {https://researchr.org/publication/HeGSQH17},  
+  researchr 	= {https://researchr.org/publication/HeGSQH17},  
   cites 	= {0},  
   citedby 	= {0},  
   journal 	= {Neurocomputing},  
