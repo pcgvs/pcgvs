@@ -2,22 +2,17 @@
 
 
 
-<p align="center"><img align="center" src="media/marchio.png" style="zoom: 50%;" ></p>
-
-
-
-
+![simulation](media/synopsis.gif)
 
 ------
 
 - **[Quickstart](#-quickstart)**
+- **[CLI](#-CLI)**
 - **[Data Flow](#-data-flow)**
 - **[Bibliography](#-bibliography)**
 - **[Authors](#-authors)**
 
 ------
-
-
 
 
 
@@ -41,6 +36,26 @@ Now you can use the package in your scripts! For example:
 from pcgvs.extraction import TubeExtraction
 
 ...
+```
+
+
+
+
+
+## 🛠️ CLI
+
+```bash
+$ python .\cli.py --help
+Usage: cli.py [OPTIONS]
+
+Options:
+  -i TEXT                 Source video path  [required]
+  -o TEXT                 Path of the synopsis folder  [required]
+  -q INTEGER              q parameter of L(q)-coloring problem.  [default: 3]
+  -t INTEGER              Threads used in Strong Sort algorithm.  [default: 1]
+  -c FLOAT                Confidence threshold for Yolov5.  [default: 0.15]
+  --interp / --no-interp  Interpolates the missing bounding boxes
+  --help                  Show this message and exit.
 ```
 
 
