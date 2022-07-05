@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import cv2
 
+from tqdm import tqdm
 from os import path 
 from pathlib import Path
 from pcgvs.extraction.track import run
@@ -118,6 +119,8 @@ def extract_patches(source, outputdir, path_tubes):
     frames = _create_frames_dictionary(path_tubes)
     cap = cv2.VideoCapture(source)
     patchespath = path.join(outputdir, 'patches')    
+    nframes = int(cap. get(cv2. CAP_PROP_FRAME_COUNT))
+    pbar = tqdm(total=nframes)
 
     if path.exists(patchespath):
         shutil.rmtree(patchespath)
@@ -133,8 +136,9 @@ def extract_patches(source, outputdir, path_tubes):
                 filename = str(id) + "_" + str(num_frame) + '.jpg'
                 cv2.imwrite(path.join(patchespath, filename), ROI)
         num_frame += 1
-        print(f'extracting patches on frame {num_frame}')
+        pbar.update(1)
 
+    pbar.close()
     return patchespath
 
 

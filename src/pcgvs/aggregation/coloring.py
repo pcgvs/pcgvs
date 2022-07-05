@@ -2,6 +2,7 @@ import operator
 import numpy as np
 import networkx as nx
 
+from tqdm import tqdm
 from pcgvs.aggregation.graph import PCG
 from pcgvs.extraction import Tube
 
@@ -137,7 +138,8 @@ def color_graph(pcg: PCG, q=5):
     color = 1
     pcg.clean_colors()
     sc = SaturationCache(pcg)    
-    
+    pbar = tqdm(total=len(pcg.nodes))
+
     while len(pcg.uncolored_nodes()) > 0:
         nodes_not_colored = pcg.uncolored_nodes()
         saturations = sc.saturations(nodes_not_colored)
@@ -148,8 +150,9 @@ def color_graph(pcg: PCG, q=5):
             if pcg.node(nodekey).color is not None: continue
             if q_far_apart(pcg, color, nodekey, q) and does_not_overlap(pcg, color, nodekey):
                 
-                print(f'Coloring node {nodekey} to {color}')
+                # print(f'Coloring node {nodekey} to {color}')
                 pcg.node(nodekey).color = color
+                pbar.update(1)
                 if pcg.generated_by_overlapping(nodekey):
                     oppnode = pcg.node(pcg.identify_opposite(nodekey))
                     if oppnode.color is not None: continue
@@ -157,9 +160,11 @@ def color_graph(pcg: PCG, q=5):
                     vs, ve, _, _ = pcg.identify_quatern(nodekey)
                     delta = pcg.node(ve).frame - pcg.node(vs).frame
                     oppnode.color = color + m * delta  
-                    print(f'Coloring node {oppnode.id} to {oppnode.color}')
+                    # print(f'Coloring node {oppnode.id} to {oppnode.color}')
+                    pbar.update(1)
 
         color += 1
+    pbar.close()
         
 #---------------------------------------#
 #---------------------------------------#
