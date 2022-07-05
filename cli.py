@@ -9,7 +9,7 @@ from pcgvs.aggregation.relations import RelationsMap
 from pcgvs.aggregation.graph import PCG
 from pcgvs.aggregation.coloring import color_graph, tubes_starting_time
 from pcgvs.synopsis import generate_frames, generate_synopsis
-from pcgvs.metrics import _get_video_resolution
+from pcgvs.utils import get_video_resolution
 
 @click.command()
 @click.option('-i',                     help='Source video path', required=True)
@@ -26,7 +26,7 @@ def synopsis(i, o, q, t, c, interp):
     if torch.cuda.is_available():
         print('Torch is using GPU', torch.cuda.current_device())
 
-    w, h = _get_video_resolution(i)
+    w, h = get_video_resolution(i)
     if w > 1280 or h > 1280:
         i = resize_from_center(i, 1280)
 

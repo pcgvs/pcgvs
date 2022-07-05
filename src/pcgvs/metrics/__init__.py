@@ -1,33 +1,19 @@
 import cv2
 import numpy as np
 
-def _get_video_duration(video_path):
-    cap = cv2.VideoCapture(video_path)
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    duration = frame_count/fps
-    cap.release()
-    return duration
-
-
-def _get_video_resolution(video_path):
-    cap = cv2.VideoCapture(video_path)
-    w = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-    h = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-    cap.release()
-    return int(w), int(h)
+from pcgvs.utils import get_video_duration, get_video_resolution
 
 
 def FR(synopsis_video_path: str, original_video_path: str):
     """ Frame condensation ratio """
-    Ts = _get_video_duration(synopsis_video_path)
-    Ti = _get_video_duration(original_video_path)
+    Ts = get_video_duration(synopsis_video_path)
+    Ti = get_video_duration(original_video_path)
     return Ts / Ti
 
 
 def CR(synopsis_video_path: str, frames: dict):
     """ Frame compact rate """
-    w, h = _get_video_resolution(synopsis_video_path)
+    w, h = get_video_resolution(synopsis_video_path)
     multiplier = 1 / (w * h * len(frames))
     foreg_area = 0
     for objects in frames.values():
@@ -40,7 +26,7 @@ def CR(synopsis_video_path: str, frames: dict):
 
 def OR(synopsis_video_path: str, frames: dict):
     """ Overlap ratio """
-    w, h = _get_video_resolution(synopsis_video_path)
+    w, h = get_video_resolution(synopsis_video_path)
     multiplier = 1 / (w * h * len(frames))
     overlap_area = 0
     for objects in frames.values():

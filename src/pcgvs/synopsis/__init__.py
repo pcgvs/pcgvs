@@ -58,8 +58,8 @@ def generate_synopsis(frames, output_dir, fps, bgpath, interp=False):
 
                 try:
                     frame[y:y+s_img.shape[0], x:x+s_img.shape[1]] = s_img
-                    cv2.rectangle(frame,(x,y),(x+w,y+h),thickness=2,color=(255,0,0))
-                    cv2.putText(frame, time,(x,y-20),cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,255,0), 2)
+                    cv2.rectangle(frame,(x,y),(x+w,y+h), thickness=1, color=(214,73,51))
+                    cv2.putText(frame, time,(x,y-20),cv2.FONT_HERSHEY_SIMPLEX, 0.8, (244,43,3), 2)
                 except:
                     continue
         try:

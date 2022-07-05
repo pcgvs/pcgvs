@@ -9,6 +9,7 @@ from tqdm import tqdm
 from os import path 
 from pathlib import Path
 from pcgvs.extraction.track import run
+from pcgvs.utils import get_video_nframes, get_video_duration
 
 class Tube: 
     
@@ -91,12 +92,18 @@ def load_tubes_with_pandas(path):
 
 def load_tubes_from_pandas_dataframe(df):
     tubes = []
+    nframes = df.frame.max()
     for tag in df.tag.unique():
         ob_df = df[df['tag'] == tag]
         if (len(ob_df) < 10): continue # remove shadows
         ob_df = ob_df.sort_values(by='frame')
         sframe = ob_df.frame.min()
-        eframe = ob_df.frame.max()
+        eframe = ob_df.frame.max() 
+        
+        # TODO: Fix this check. It's better to determine if an object 
+        # is stationary using the coordinates instead of this.  
+        if (eframe - sframe >= nframes - 20): continue # remove stationary objects
+        
         tube = Tube(tag, sframe, eframe)
         tubes.append(tube)
         for _, r in ob_df.iterrows():
