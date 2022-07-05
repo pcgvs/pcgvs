@@ -3,11 +3,13 @@ import cv2
 import torch
 
 from pcgvs.extraction import extract_tubes, extract_patches, extract_background, load_tubes_from_pandas_dataframe, load_tubes_with_pandas
+from pcgvs.extraction.preprocessing import resize_from_center
 from pcgvs.aggregation import solve, add_ss_to_dataframe
 from pcgvs.aggregation.relations import RelationsMap
 from pcgvs.aggregation.graph import PCG
 from pcgvs.aggregation.coloring import color_graph, tubes_starting_time
 from pcgvs.synopsis import generate_frames, generate_synopsis
+from pcgvs.metrics import _get_video_resolution
 
 @click.command()
 @click.option('-i',                     help='Source video path', required=True)
@@ -23,6 +25,10 @@ def synopsis(i, o, q, t, c, interp):
 
     if torch.cuda.is_available():
         print('Torch is using GPU', torch.cuda.current_device())
+
+    w, h = _get_video_resolution(i)
+    if w > 1280 or h > 1280:
+        i = resize_from_center(i, 1280)
 
     # Extraction
     tubes_path = extract_tubes(source=i, outputdir=o, conf_thres=c, threads=t)
