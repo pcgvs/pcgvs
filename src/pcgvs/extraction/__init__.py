@@ -137,7 +137,7 @@ def extract_patches(source, outputdir, path_tubes):
     num_frame = 1
     while ret:
         ret, frame = cap.read()
-        if num_frame in frames.keys():
+        if frame is not None and num_frame in frames.keys():
             for id, x, y, w, h in frames[num_frame]:
                 ROI = frame[y:y+h, x:x+w].copy()
                 filename = str(id) + "_" + str(num_frame) + '.jpg'
